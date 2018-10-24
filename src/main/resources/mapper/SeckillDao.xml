@@ -1,0 +1,50 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--SeckillDao sql配置文件-->
+<mapper namespace="com.hxf.seckill.dao.SeckillDao">
+
+    <!--减库存sql，resultType返回类型默认是int,其中不允许用“<=”，所以用了<![CDATA[]]>来表示这个不是xml语法-->
+    <update id="reduceNumber">
+        UPDATE
+          seckill
+        SET
+          number = number-1
+        WHERE
+          seckill_id =  #{seckillId}
+        AND start_time <![CDATA[ <= ]]> #{killTime}
+        AND end_time  >=  #{killTime}
+        AND number > 0
+    </update>
+    <!--查询一条秒杀商品信息sql-->
+    <select id="queryById" resultType="Seckill" parameterType="long">
+        SELECT
+          seckill_id,name,number,start_time,end_time,create_time
+        FROM
+          seckill
+        WHERE
+          seckill_id = #{seckillId}
+    </select>
+    <!--查询多条商品信息，分页,如果用的list、set、map，我们只需要给出里面的类型（泛型）-->
+    <select id="queryAll" resultType="Seckill">
+        SELECT
+          seckill_id,name,number,start_time,end_time,create_time
+        FROM
+          seckill
+        ORDER BY
+          create_time DESC
+        LIMIT
+           #{offset}, #{limit}
+    </select>
+
+    <select id="killSeckillProcedure" statementType="CALLABLE">
+        call execute_seckill(
+          #{seckillId,jdbcType=BIGINT,mode=IN},
+          #{userPhone,jdbcType=BIGINT,mode=IN},
+          #{state,jdbcType=INTEGER,mode=IN},
+          #{killTime,jdbcType=TIMESTAMP,mode=IN},
+          #{result,jdbcType=INTEGER,mode=OUT}
+        )
+    </select>
+</mapper>

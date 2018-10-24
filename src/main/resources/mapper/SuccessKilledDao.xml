@@ -1,0 +1,35 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--SuccessKilledDao sql配置文件-->
+<mapper namespace="com.hxf.seckill.dao.SuccessKilledDao">
+        <!--插入明细sql,添加'IGNORE'关键字，主键重复不会保存，会返回0-->
+        <insert id="insertSuccessSeckilled" >
+            INSERT IGNORE INTO
+              success_killed ( seckill_id ,user_phone, state )
+            VALUES
+              ( #{seckillId} ,#{userPhone} ,#{state} )
+        </insert>
+        <!--根据id查询SuccessKilled，并携带秒杀产品对象-->
+        <!--如何把关联的seckill的数据，复制到SuccessKilled的seckill(对象)属性中取-->
+        <select id="queryByIdWithSeckill" resultType="SuccessKilled" parameterType="long">
+            SELECT
+              sk.seckill_id,
+              sk.user_phone,
+              sk.state,
+              sk.create_time,
+              s.seckill_id "seckill.seckill_id",
+              s.name "seckill.name",
+              s.number "seckill.number",
+              s.start_time "seckill.start_time",
+              s.end_time "seckill.end_time",
+              s.create_time "seckill.create_time"
+            FROM
+              success_killed sk
+            INNER JOIN seckill s ON  s.seckill_id = sk.seckill_id
+            WHERE
+              sk.seckill_id = #{seckillId}
+             AND  sk.user_phone = #{userPhone}
+        </select>
+</mapper>
